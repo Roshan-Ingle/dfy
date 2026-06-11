@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Pages</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Custom glass effects */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-input:focus {
+      border-color: rgba(129, 140, 248, 0.6);
+      box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-screen flex items-center justify-center p-4 overflow-x-hidden relative font-sans select-none">
+
+  <!-- Ambient background glow effects -->
+  <div class="absolute top-1/4 left-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+  <!-- Mobile App Wrapper -->
+  <div class="w-full max-w-sm glass-panel rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[520px] transition-all duration-500">
+    
+    <!-- Top Bar -->
+    <header class="px-6 pt-5 pb-3 flex items-center justify-between border-b border-white/5">
+      <div class="flex items-center gap-2">
+        <div class="p-1.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+          <i data-lucide="globe" class="w-4 h-4 text-indigo-400"></i>
+        </div>
+        <span class="font-bold tracking-tight text-white text-sm">GitHub Pages</span>
+      </div>
+      <div id="user-badge" class="hidden flex items-center gap-2">
+        <span id="user-login" class="text-[11px] font-mono text-slate-400"></span>
+        <button id="logout-btn" class="p-1 hover:text-red-400 text-slate-500 transition-colors">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- App Screen Area -->
+    <div class="flex-grow flex flex-col justify-center px-6 py-6 relative">
+      
+      <!-- STEP 1: Enter GitHub PAT -->
+      <div id="screen-pat" class="space-y-5 transition-all duration-300">
+        <div class="text-center space-y-1">
+          <h2 class="text-lg font-bold text-white tracking-tight">Personal Access Token</h2>
+          <p class="text-xs text-slate-400 px-4">Authenticate securely using your GitHub Personal Access Token.</p>
+        </div>
+        <div class="space-y-4">
+          <input type="password" id="pat-input" placeholder="Paste PAT (ghp_...)" class="w-full px-4 py-3 glass-input rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none transition-all font-mono">
+          <button id="pat-next-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+            <span>Continue</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+        <p class="text-[10px] text-center text-slate-500 max-w-[250px] mx-auto">
+          Requires a classic or fine-grained token with repository content write and pages administration access.
+        </p>
+      </div>
+
+      <!-- STEP 2: Name Repo -->
+      <div id="screen-repo" class="hidden space-y-5 transition-all duration-300">
+        <div class="text-center space-y-1">
+          <h2 class="text-lg font-bold text-white tracking-tight">Name Repository</h2>
+          <p class="text-xs text-slate-400">Type the repository name for your hosted web page.</p>
+        </div>
+        <div class="space-y-4">
+          <input type="text" id="repo-name-input" placeholder="my-custom-website" class="w-full px-4 py-3 glass-input rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none transition-all font-mono">
+          <button id="repo-next-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+            <span>Next</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+        <p class="text-[10px] text-center text-slate-500">
+          If the repository already exists, your page will overwrite files on the main branch. Otherwise, a new public repository is created.
+        </p>
+      </div>
+
+      <!-- STEP 3: Select File -->
+      <div id="screen-file" class="hidden space-y-5 transition-all duration-300">
+        <div class="text-center space-y-1">
+          <h2 class="text-lg font-bold text-white tracking-tight">Upload File</h2>
+          <p class="text-xs text-slate-400">Choose your custom HTML file. It will be renamed automatically to index.html.</p>
+        </div>
+        
+        <div class="space-y-4">
+          <div id="drop-zone" class="border border-dashed border-white/10 rounded-2xl p-6 text-center hover:bg-white/5 transition-all relative cursor-pointer flex flex-col items-center justify-center min-h-[120px]">
+            <input type="file" id="file-input" accept=".html" class="absolute inset-0 opacity-0 cursor-pointer">
+            <div class="p-3 bg-white/5 rounded-full mb-2">
+              <i data-lucide="file-code" class="w-5 h-5 text-indigo-400"></i>
+            </div>
+            <p id="file-label" class="text-xs text-slate-300 font-medium">Select HTML file</p>
+          </div>
+
+          <button id="deploy-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+            <i data-lucide="rocket" class="w-3.5 h-3.5"></i>
+            <span>Deploy to Web</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Live Check & Progress -->
+      <div id="screen-loading" class="hidden flex flex-col items-center justify-center text-center space-y-6 transition-all duration-300">
+        
+        <!-- Glowing Loader / Pulse -->
+        <div class="relative flex items-center justify-center w-28 h-28">
+          <div class="absolute inset-0 bg-indigo-500/10 rounded-full animate-ping pointer-events-none"></div>
+          <div class="absolute inset-2 border-4 border-slate-800 border-t-indigo-500 rounded-full animate-spin"></div>
+          <span id="timer" class="text-sm font-semibold text-white tracking-wider font-mono">00:00</span>
+        </div>
+
+        <div class="space-y-1">
+          <h2 id="loading-stage" class="text-sm font-semibold text-slate-200">Preparing Repository...</h2>
+          <p class="text-[11px] text-slate-500">Compiling deployment on GitHub Pages servers.</p>
+        </div>
+      </div>
+
+      <!-- STEP 5: Success Portal -->
+      <div id="screen-success" class="hidden flex flex-col items-center justify-center text-center space-y-6 transition-all duration-300">
+        <div class="w-14 h-14 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/5 animate-bounce">
+          <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        
+        <div class="space-y-1">
+          <h2 class="text-base font-bold text-white tracking-tight">Your Site is Live!</h2>
+          <p id="success-time" class="text-[10px] text-slate-500 font-mono"></p>
+        </div>
+
+        <div class="w-full space-y-3">
+          <a id="success-link" href="#" target="_blank" class="w-full glass-input px-4 py-3 rounded-xl text-xs font-mono text-indigo-400 hover:text-indigo-300 flex items-center justify-between transition-colors">
+            <span class="truncate pr-4"></span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          </a>
+
+          <button id="restart-btn" class="w-full bg-white/5 hover:bg-white/10 text-slate-300 font-semibold py-2.5 rounded-xl text-[11px] transition-colors border border-white/5">
+            Deploy Another Site
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation Dot Indicators -->
+    <div id="dot-nav" class="px-6 py-4 flex justify-center items-center gap-1.5 border-t border-white/5">
+      <div class="step-dot w-1.5 h-1.5 rounded-full bg-indigo-500 transition-all duration-300"></div>
+      <div class="step-dot w-1.5 h-1.5 rounded-full bg-slate-700 transition-all duration-300"></div>
+      <div class="step-dot w-1.5 h-1.5 rounded-full bg-slate-700 transition-all duration-300"></div>
+      <div class="step-dot w-1.5 h-1.5 rounded-full bg-slate-700 transition-all duration-300"></div>
+      <div class="step-dot w-1.5 h-1.5 rounded-full bg-slate-700 transition-all duration-300"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const state = {
+      pat: localStorage.getItem('gh_pat') || '',
+      user: null,
+      repoName: '',
+      htmlFile: null,
+      startTime: 0,
+      timerInterval: null
+    };
+
+    const screens = ['screen-pat', 'screen-repo', 'screen-file', 'screen-loading', 'screen-success'];
+    const el = {
+      userBadge: document.getElementById('user-badge'),
+      userLogin: document.getElementById('user-login'),
+      logoutBtn: document.getElementById('logout-btn'),
+      patInput: document.getElementById('pat-input'),
+      patNextBtn: document.getElementById('pat-next-btn'),
+      repoNameInput: document.getElementById('repo-name-input'),
+      repoNextBtn: document.getElementById('repo-next-btn'),
+      dropZone: document.getElementById('drop-zone'),
+      fileInput: document.getElementById('file-input'),
+      fileLabel: document.getElementById('file-label'),
+      deployBtn: document.getElementById('deploy-btn'),
+      loadingStage: document.getElementById('loading-stage'),
+      timer: document.getElementById('timer'),
+      successTime: document.getElementById('success-time'),
+      successLink: document.getElementById('success-link'),
+      restartBtn: document.getElementById('restart-btn'),
+      dots: document.querySelectorAll('.step-dot'),
+      dotNav: document.getElementById('dot-nav')
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      setupAppFlow();
+      if (state.pat) {
+        el.patInput.value = state.pat;
+        silentLogin(state.pat);
+      }
+    });
+
+    function setupAppFlow() {
+      // Step 1 Click
+      el.patNextBtn.addEventListener('click', async () => {
+        const pat = el.patInput.value.trim();
+        if (!pat) return alert('Token required.');
+        const success = await silentLogin(pat);
+        if (success) showStep('screen-repo');
+      });
+
+      // Step 2 Click
+      el.repoNextBtn.addEventListener('click', () => {
+        const name = el.repoNameInput.value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+        if (!name) return alert('Repository name required.');
+        state.repoName = name;
+        showStep('screen-file');
+      });
+
+      // Step 3 File Setup
+      el.fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          state.htmlFile = file;
+          el.fileLabel.textContent = file.name;
+        }
+      });
+
+      el.deployBtn.addEventListener('click', () => {
+        if (!state.htmlFile) return alert('Please select an HTML file to deploy.');
+        runDeploymentPipeline();
+      });
+
+      // Restart flow
+      el.restartBtn.addEventListener('click', () => {
+        state.htmlFile = null;
+        el.fileLabel.textContent = 'Select HTML file';
+        el.fileInput.value = '';
+        showStep('screen-repo');
+      });
+
+      el.logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('gh_pat');
+        state.pat = '';
+        state.user = null;
+        el.userBadge.classList.add('hidden');
+        el.patInput.value = '';
+        showStep('screen-pat');
+      });
+    }
+
+    async function silentLogin(pat) {
+      try {
+        const res = await fetch('https://api.github.com/user', {
+          headers: { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (!res.ok) throw new Error();
+        state.user = await res.json();
+        state.pat = pat;
+        localStorage.setItem('gh_pat', pat);
+
+        el.userLogin.textContent = `@${state.user.login}`;
+        el.userBadge.classList.remove('hidden');
+        return true;
+      } catch (e) {
+        alert('Invalid Personal Access Token.');
+        localStorage.removeItem('gh_pat');
+        return false;
+      }
+    }
+
+    function showStep(screenId) {
+      screens.forEach(s => document.getElementById(s).classList.add('hidden'));
+      document.getElementById(screenId).classList.remove('hidden');
+
+      // Hide or show dot navigation bar
+      if (screenId === 'screen-loading' || screenId === 'screen-success') {
+        el.dotNav.classList.add('hidden');
+      } else {
+        el.dotNav.classList.remove('hidden');
+      }
+
+      // Update progress dots visually
+      const activeIdx = screens.indexOf(screenId);
+      el.dots.forEach((dot, idx) => {
+        if (idx === activeIdx) {
+          dot.className = 'step-dot w-3 h-1.5 rounded-full bg-indigo-500 transition-all duration-300';
+        } else {
+          dot.className = 'step-dot w-1.5 h-1.5 rounded-full bg-slate-700 transition-all duration-300';
+        }
+      });
+    }
+
+    async function pushFileDirectly(owner, repo, path, base64Content, branch) {
+      const body = { message: `Deploy ${path}`, content: base64Content, branch };
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${state.pat}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error('Failed uploading to target repository.');
+    }
+
+    async function runDeploymentPipeline() {
+      showStep('screen-loading');
+      el.loadingStage.textContent = 'Preparing Repository...';
+      
+      // Start watch interface timer
+      state.startTime = performance.now();
+      clearInterval(state.timerInterval);
+      state.timerInterval = setInterval(() => {
+        const totalSecs = Math.floor((performance.now() - state.startTime) / 1000);
+        const mins = String(Math.floor(totalSecs / 60)).padStart(2, '0');
+        const secs = String(totalSecs % 60).padStart(2, '0');
+        el.timer.textContent = `${mins}:${secs}`;
+      }, 1000);
+
+      try {
+        const owner = state.user.login;
+        const repo = state.repoName;
+        const defaultBranch = 'main';
+
+        // Read file contents inside browser
+        const base64Content = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result.split(',')[1]);
+          r.onerror = rej;
+          r.readAsDataURL(state.htmlFile);
+        });
+
+        // 1. Verify if repo exists, if not, create empty
+        el.loadingStage.textContent = 'Configuring Space...';
+        const repoCheck = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+          headers: { 'Authorization': `token ${state.pat}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+
+        if (!repoCheck.ok) {
+          const initRepo = await fetch('https://api.github.com/user/repos', {
+            method: 'POST',
+            headers: {
+              'Authorization': `token ${state.pat}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify({ name: repo, private: false, auto_init: false })
+          });
+          if (!initRepo.ok) throw new Error('Failed to generate GitHub repository.');
+        }
+
+        // 2. Commit file directly (Forces single-commit to branch 'main' directly)
+        el.loadingStage.textContent = 'Deploying File Asset...';
+        await pushFileDirectly(owner, repo, 'index.html', base64Content, defaultBranch);
+
+        // Also push .nojekyll automatically to safeguard custom asset paths
+        await pushFileDirectly(owner, repo, '.nojekyll', '', defaultBranch);
+
+        // 3. Setup Pages routing source
+        el.loadingStage.textContent = 'Initiating Environment...';
+        await fetch(`https://api.github.com/repos/${owner}/${repo}/pages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${state.pat}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify({ source: { branch: defaultBranch, path: '/' } })
+        });
+
+        // 4. Poll and wait until pipeline is finished
+        el.loadingStage.textContent = 'Building Pages Website...';
+        let isBuilt = false;
+        let siteUrl = '';
+
+        for (let i = 0; i < 60; i++) {
+          const checkUrlRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/pages`, {
+            headers: { 'Authorization': `token ${state.pat}`, 'Accept': 'application/vnd.github.v3+json' }
+          });
+          if (checkUrlRes.ok) {
+            const info = await checkUrlRes.json();
+            siteUrl = info.html_url;
+            if (info.status === 'built') {
+              isBuilt = true;
+              break;
+            }
+          } else if (checkUrlRes.status === 404 && i === 0) {
+            // Retry configuring Pages fallback in case GitHub took a second to register the branch
+            await fetch(`https://api.github.com/repos/${owner}/${repo}/pages`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `token ${state.pat}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+              },
+              body: JSON.stringify({ source: { branch: defaultBranch, path: '/' } })
+            });
+          }
+          await new Promise(r => setTimeout(r, 2000));
+        }
+
+        clearInterval(state.timerInterval);
+
+        if (isBuilt && siteUrl) {
+          const totalDuration = ((performance.now() - state.startTime) / 1000).toFixed(0);
+          el.successTime.textContent = `Completed in ${totalDuration}s`;
+          el.successLink.href = siteUrl;
+          el.successLink.querySelector('span').textContent = siteUrl;
+          showStep('screen-success');
+        } else {
+          throw new Error('Build process took longer than expected.');
+        }
+
+      } catch (err) {
+        clearInterval(state.timerInterval);
+        alert(err.message || 'An error occurred during deployment.');
+        showStep('screen-file');
+      }
+    }
+  </script>
+</body>
+</html>
